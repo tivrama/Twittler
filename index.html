@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="jquery.js"></script>
+    <script src="data_generator.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="node_modules/underscore/underscore-min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+
+
+    <script>
+
+      $(document).ready(function(){
+
+
+
+        var $body = $('body');
+        // $body.html(''); // -->  this is resetting the page to an '' (empty string).  delete?
+
+        $body.css('background-color', '#3FB2E4');
+
+
+        var checkNewTweetsButton = document.createElement("button");
+        var checkNewTweetsButtonLabel = document.createTextNode("Check for new tweets");
+        checkNewTweetsButton.appendChild(checkNewTweetsButtonLabel);
+        document.body.appendChild(checkNewTweetsButton); 
+        $('button').addClass('btn btn-info');    
+        
+        var insertNameTextFieldFilter = document.createElement("input");
+        var nameTextFieldPlaceHolderText = document.createTextNode("...");
+        insertNameTextFieldFilter.appendChild(nameTextFieldPlaceHolderText);
+        document.body.appendChild(insertNameTextFieldFilter);
+        $('input').attr({'type': 'text', 'id': 'inputField', 'placeholder': 'enter name here...'});
+
+        var filterButton = document.createElement("button");
+        var filterButtonLabel = document.createTextNode("Filter by name");
+        filterButton.appendChild(filterButtonLabel);
+        document.body.appendChild(filterButton);
+        $('button').addClass('btn btn-info'); 
+
+        var ClearAllButton = document.createElement("button");
+        var clearAllButtonLabel = document.createTextNode("Clear All Tweets");
+        ClearAllButton.appendChild(clearAllButtonLabel);
+        document.body.appendChild(ClearAllButton);
+        $('button').addClass('btn btn-info');
+
+        var showAllButton = document.createElement("button");
+        var showAllButtonLabel = document.createTextNode("Show All Tweets");
+        showAllButton.appendChild(showAllButtonLabel);
+        document.body.appendChild(showAllButton);
+        $('button').addClass('btn btn-info');
+
+
+        //load all current tweets on opening page
+        var index = streams.home.length - 1;
+        while(index >= 0){
+          var tweet = streams.home[index];
+          var $tweet = $('<div class="tweets"></div>');
+          $tweet.html('@' + '<a href="#">' + tweet.user + '</a>' + ': ' + tweet.message + ': ' + tweet.created_at);
+          $tweet.appendTo($body);
+          index -= 1;
+        }
+
+        // ----------------------------------------------------------
+
+        //Load new Tweets
+        index = 11;
+
+        $(checkNewTweetsButton).on('click', function() {
+          for(index; index < streams.home.length; index++){
+            var tweet = streams.home[index];
+            var $tweet = $('<div class="tweets"></div>');
+            $tweet.html('@' + '<a href="#">' + tweet.user + '</a>' + ': ' + tweet.message + ': ' + tweet.created_at);
+            $tweet.prependTo($body);
+            index += 1;
+          }
+          //reset the buttons
+          checkNewTweetsButton.remove();
+          $(showAllButton).prependTo($body);
+          $(ClearAllButton).prependTo($body);
+          $(filterButton).prependTo($body);
+          $(insertNameTextFieldFilter).prependTo($body);
+          $(checkNewTweetsButton).prependTo($body);
+        });
+
+        // ----------------------------------------------------------
+
+        //filter using link - only working on refresh page.  "a" anchor is not working afterwards
+        $("a").on("click", function() {
+          event.preventDefault()
+          $('.tweets').remove()
+
+          var $name = $(this).text()
+          console.log($name);
+          
+
+          var index = streams.home.length-1;
+
+          while(index >= 0){
+            if($name === streams.home[index].user){
+            var tweet = streams.home[index];
+            var $tweet = $('<div class="tweets"></div>');
+            $tweet.html('@' + '<a href="#">' + tweet.user + '</a>' + ': ' + tweet.message + ': ' + tweet.created_at);
+            $tweet.prependTo($body);
+          }
+            index -= 1;
+          }
+          //reset the buttons
+          checkNewTweetsButton.remove();
+          $(showAllButton).prependTo($body);
+          $(ClearAllButton).prependTo($body);
+          $(filterButton).prependTo($body);
+          $(insertNameTextFieldFilter).prependTo($body);
+          $(checkNewTweetsButton).prependTo($body);
+
+        });
+
+
+
+        // ----------------------------------------------------------
+
+        // Filter
+        // using filter 
+        $(filterButton).on('click', function() {
+          //make a var to capture user's input name
+          var name = $(insertNameTextFieldFilter).val();
+          //clear the input field
+
+          //clear page of tweets
+          $('div').remove();
+
+          //make an array of tweets that are filtered by name.
+          var filterResults = function(name){
+            return streams.home.filter(function(val){
+              if(val.user === name){
+                return val.user;
+              }
+            });
+          };
+
+          var filteredResults = filterResults(name);
+
+          //return the new list to page.  Try resusing the first while loop
+          var i = filteredResults.length-1
+          while(i >= 0){
+            var tweet = filteredResults[i];
+            var $tweet = $('<div class="tweets"></div>');
+            $tweet.html('@' + '<a href="#">' + tweet.user + '</a>' + ': ' + tweet.message + ': ' + tweet.created_at);
+            $tweet.appendTo($body);
+            i -= 1;
+          }
+
+          //reset the page
+          checkNewTweetsButton.remove();
+          $(filterButton).prependTo($body);
+          $(insertNameTextFieldFilter).prependTo($body);
+          $(checkNewTweetsButton).prependTo($body);
+          $(insertNameTextFieldFilter).val('');
+
+        });
+
+        // ----------------------------------------------------------
+
+        //Clear tweets
+        $(ClearAllButton).on('click', function() {
+          //clear page of tweets
+          $('div').remove();
+
+        });
+
+        // ----------------------------------------------------------
+
+        //Show all tweets
+        $(showAllButton).on('click', function() {
+          //clear page of tweets
+          $('div').remove();
+          //run original load tweets loop
+          var j = streams.home.length-1
+          while(j >= 0){
+            var tweet = streams.home[j];
+            var $tweet = $('<div class="tweets"></div>');
+            $tweet.html('@' + '<a href="#">' + tweet.user + '</a>' + ': ' + tweet.message + ': ' + tweet.created_at);
+            $tweet.appendTo($body);
+            j -= 1;
+          }
+
+        });       
+
+
+
+      });      
+
+    </script>
+
+  </body>
+</html>
